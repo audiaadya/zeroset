@@ -11,7 +11,9 @@ import HostDashboardPage from './pages/HostDashboardPage';
 import CommunitySetsPage from './pages/CommunitySetsPage';
 import CommunitySetPage from './pages/CommunitySetPage';
 import AccountStatsPage from './pages/AccountStatsPage';
+import SettingsPage from './pages/SettingsPage';
 import SandboxPage from './pages/SandboxPage';
+import SkillTreePage from './pages/SkillTreePage';
 
 function Routes() {
   const { route, navigate } = useRouter();
@@ -35,10 +37,21 @@ function Routes() {
   if (path === '/community') {
     return <CommunitySetsPage navigate={navigate} />;
   }
-  if (path === '/me' || path === '/me/settings') {
+  if (path === '/me') {
     return <AccountStatsPage navigate={navigate} />;
   }
+  if (path === '/me/settings') {
+    return <SettingsPage navigate={navigate} />;
+  }
   if (path === '/sandbox') {
+    return <SandboxPage />;
+  }
+  if (path === '/skill-tree') {
+    return <SkillTreePage />;
+  }
+
+  const sandboxMatch = matchRoute(path, '/sandbox/:token');
+  if (sandboxMatch) {
     return <SandboxPage />;
   }
 

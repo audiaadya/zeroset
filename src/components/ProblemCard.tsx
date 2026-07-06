@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Lock, ChevronDown, ChevronUp, Lightbulb, BookOpen, Droplet } from 'lucide-react';
+import { Lock, ChevronDown, ChevronUp, Lightbulb, BookOpen, Droplet, Swords } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import type { Problem, WeekSet } from '../lib/types';
 import { isWeekUnlocked } from '../data/weeks';
 import DifficultyBadge from './DifficultyBadge';
 import MathText from './MathText';
 import SolutionEditor from './SolutionEditor';
+import ProblemRating from './ProblemRating';
+import ErrorReportButton from './ErrorReportButton';
+import InteractiveProofWalk from './InteractiveProofWalk';
+import ProblemDiscussion from './ProblemDiscussion';
+import ProblemTags from './ProblemTags';
+import ProofDuelArena from './ProofDuelArena';
 
 interface Props {
   problem: Problem;
   week: WeekSet;
 }
 
-// DB problem ids are UUIDs; seed ids look like "w1-p3".
 function isDbId(id: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 }
@@ -21,6 +26,8 @@ export default function ProblemCard({ problem, week }: Props) {
   const unlocked = isWeekUnlocked(week);
   const [openSolution, setOpenSolution] = useState(false);
   const [showConnection, setShowConnection] = useState(false);
+  const [showProofWalk, setShowProofWalk] = useState(false);
+  const [showDuel, setShowDuel] = useState(false);
   const [firstBlood, setFirstBlood] = useState<string | null>(null);
 
   useEffect(() => {
@@ -58,12 +65,17 @@ export default function ProblemCard({ problem, week }: Props) {
             </div>
           </div>
         </div>
+        <div className="flex items-center gap-3">
+          <ProblemRating problemId={problem.id} />
+          <ErrorReportButton problemId={problem.id} />
+        </div>
       </header>
 
       <div className="space-y-4 p-5">
+        <ProblemTags problemId={problem.id} editable={false} />
+
         <MathText>{problem.statement}</MathText>
 
-        {/* Connection note */}
         <div className="rounded-md border border-ink-700/70 bg-ink-900/40 p-3">
           <button
             onClick={() => setShowConnection((v) => !v)}
@@ -86,7 +98,6 @@ export default function ProblemCard({ problem, week }: Props) {
           )}
         </div>
 
-        {/* Solution submission */}
         <div>
           <button
             onClick={() => setOpenSolution((v) => !v)}
@@ -105,30 +116,54 @@ export default function ProblemCard({ problem, week }: Props) {
           )}
         </div>
 
-        {/* Official answer + proof */}
+        <div>
+          <button
+            onClick={() => setShowDuel((v) => !v)}
+            className="focus-ring flex w-full items-center justify-between gap-2 rounded-md border border-ink-700 bg-ink-900/40 px-3 py-2.5 text-left text-sm text-ink-200 transition hover:border-accent-400/40 hover:text-accent-200"
+          >
+            <span className="flex items-center gap-2">
+              <Swords className="h-4 w-4 text-red-400" />
+              {showDuel ? 'Hide Proof Duel Arena' : 'Proof Duel Arena'}
+            </span>
+            {showDuel ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </button>
+          {showDuel && (
+            <div className="mt-3">
+              <ProofDuelArena problem={problem} />
+            </div>
+          )}
+        </div>
+
         <div className="relative">
           <div className="mb-2 flex items-center justify-between">
-            <h4 className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-ink-300">
+            <button
+              onClick={() => setShowProofWalk((v) => !v)}
+              className="focus-ring flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-ink-300 hover:text-accent-300"
+            >
               <BookOpen className="h-3.5 w-3.5 text-accent-400" />
-              Official answer & proof
-            </h4>
+              {showProofWalk ? 'Hide' : 'Show'} Interactive Proof-Walk
+            </button>
             {!unlocked && (
               <span className="flex items-center gap-1.5 rounded border border-accent-400/30 bg-accent-400/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-accent-300">
                 <Lock className="h-3 w-3" /> Locked
               </span>
             )}
           </div>
-          <div className={`rounded-md border border-ink-700 bg-ink-900/60 p-4 ${!unlocked ? 'locked-blur' : ''}`}>
-            <div className="mb-3">
-              <div className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-400">Answer</div>
-              <MathText>{problem.answer}</MathText>
+          {showProofWalk ? (
+            <InteractiveProofWalk answer={problem.answer} proof={problem.proof} unlocked={unlocked} />
+          ) : (
+            <div className={`rounded-md border border-ink-700 bg-ink-900/60 p-4 ${!unlocked ? 'locked-blur' : ''}`}>
+              <div className="mb-3">
+                <div className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-400">Answer</div>
+                <MathText>{problem.answer}</MathText>
+              </div>
+              <div>
+                <div className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-400">Proof</div>
+                <MathText>{problem.proof}</MathText>
+              </div>
             </div>
-            <div>
-              <div className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ink-400">Proof</div>
-              <MathText>{problem.proof}</MathText>
-            </div>
-          </div>
-          {!unlocked && (
+          )}
+          {!unlocked && !showProofWalk && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="pointer-events-auto rounded-md border border-accent-400/40 bg-ink-900/90 px-4 py-2 text-center text-xs text-ink-300 shadow-glow">
                 <Lock className="mb-1 inline h-3.5 w-3.5 text-accent-400" />
@@ -137,6 +172,8 @@ export default function ProblemCard({ problem, week }: Props) {
             </div>
           )}
         </div>
+
+        <ProblemDiscussion problemId={problem.id} />
       </div>
     </article>
   );

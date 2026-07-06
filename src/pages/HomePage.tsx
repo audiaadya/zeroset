@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Calendar, Layers, Loader2, Sparkles } from 'lucide-react';
+import { ArrowRight, Calendar, Layers, Loader2, Sparkles, Clock } from 'lucide-react';
 import { CURRENT_WEEK, isWeekUnlocked } from '../data/weeks';
 import { fetchCurrentOfficialSet } from '../lib/sets';
 import { isSupabaseConfigured } from '../lib/supabaseClient';
 import type { WeekSet } from '../lib/types';
 import CountdownTimer from '../components/CountdownTimer';
 import ProblemCard from '../components/ProblemCard';
+import MockSimulator from '../components/MockSimulator';
 
 interface Props {
   navigate: (to: string) => void;
@@ -14,6 +15,7 @@ interface Props {
 export default function HomePage({ navigate }: Props) {
   const [week, setWeek] = useState<WeekSet>(CURRENT_WEEK);
   const [loading, setLoading] = useState(true);
+  const [mockMode, setMockMode] = useState(false);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -102,14 +104,31 @@ export default function HomePage({ navigate }: Props) {
               proofs unlock when the timer hits zero.
             </p>
           </div>
-          <CountdownTimer target={week.revealDate} />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMockMode(!mockMode)}
+              className={`focus-ring flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition ${
+                mockMode
+                  ? 'border-amber-500/50 bg-amber-500/15 text-amber-300'
+                  : 'border-ink-700 text-ink-400 hover:border-accent-400/40 hover:text-accent-200'
+              }`}
+            >
+              <Clock className="h-3.5 w-3.5" />
+              {mockMode ? 'Exit Mock Mode' : 'Mock Simulator'}
+            </button>
+            <CountdownTimer target={week.revealDate} />
+          </div>
         </div>
 
-        <div className="space-y-6">
-          {week.problems.map((p) => (
-            <ProblemCard key={p.id} problem={p} week={week} />
-          ))}
-        </div>
+        {mockMode ? (
+          <MockSimulator problems={week.problems} week={week} onComplete={() => setMockMode(false)} />
+        ) : (
+          <div className="space-y-6">
+            {week.problems.map((p) => (
+              <ProblemCard key={p.id} problem={p} week={week} />
+            ))}
+          </div>
+        )}
 
         {unlocked && (
           <div className="mt-8 rounded-lg border border-accent-400/30 bg-accent-400/5 p-4 text-sm text-ink-300">

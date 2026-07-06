@@ -13,10 +13,12 @@ import {
   Send,
   Trash2,
   X,
+  Tag,
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth, useDisplayName } from '../lib/AuthContext';
 import type { DbProblem, DbWeekSet, Difficulty } from '../lib/types';
+import ProblemTags from '../components/ProblemTags';
 
 interface Props {
   navigate: (to: string) => void;
@@ -555,6 +557,13 @@ function SetEditor({
                         placeholder="Proof (locked until reveal)"
                         className="focus-ring w-full resize-y rounded-md border border-ink-700 bg-ink-900 px-3 py-2 font-mono text-xs text-ink-100"
                       />
+                    </div>
+                    <div className="mt-2">
+                      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-ink-300">
+                        <Tag className="h-3 w-3" />
+                        Tags
+                      </label>
+                      <ProblemTags problemId={p.id} editable />
                     </div>
                   </div>
                 )}

@@ -12,10 +12,13 @@ import {
   Target,
   TrendingUp,
   Zap,
+  Network,
 } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import { fetchLeaderboard, syncMyProfile, type Profile } from '../lib/profile';
 import { computeBadges, levelFloorXp, nextLevelXp, progressInLevel } from '../lib/gamify';
+import AchievementBadge from '../components/AchievementBadge';
+import QEDJournalExport from '../components/QEDJournalExport';
 
 interface Props {
   navigate: (to: string) => void;
@@ -185,6 +188,14 @@ export default function AccountStatsPage({ navigate }: Props) {
         />
       </section>
 
+      {/* Field Medal Achievements */}
+      <section className="mb-8">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-serif text-xl text-ink-50">Field Medal Achievements</h2>
+        </div>
+        <AchievementBadge userId={user.id} showAll />
+      </section>
+
       {/* Badges */}
       <section className="mb-8">
         <div className="mb-4 flex items-center justify-between">
@@ -223,6 +234,32 @@ export default function AccountStatsPage({ navigate }: Props) {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* Q.E.D. Journal Export */}
+      <section className="mb-8">
+        <QEDJournalExport />
+      </section>
+
+      {/* Skill Tree */}
+      <section className="mb-8">
+        <div className="rounded-lg border border-ink-700 bg-ink-850/50 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Network className="h-5 w-5 text-emerald-400" />
+              <h4 className="font-serif text-lg text-ink-50">Skill Tree Progress</h4>
+            </div>
+            <button
+              onClick={() => navigate('/skill-tree')}
+              className="focus-ring rounded-md border border-ink-700 px-3 py-1.5 text-xs text-ink-300 hover:text-accent-200"
+            >
+              View Skill Tree
+            </button>
+          </div>
+          <p className="mt-2 text-sm text-ink-400">
+            Track your mastery across mathematical domains.
+          </p>
         </div>
       </section>
 
@@ -273,7 +310,13 @@ export default function AccountStatsPage({ navigate }: Props) {
         )}
       </section>
 
-      <div className="mt-8 flex items-center justify-center">
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <button
+          onClick={() => navigate('/me/settings')}
+          className="focus-ring rounded-md border border-accent-400 bg-accent-400/15 px-4 py-2 text-sm font-semibold text-accent-200 hover:bg-accent-400/25"
+        >
+          Account Settings
+        </button>
         <button
           onClick={() => navigate('/')}
           className="focus-ring rounded-md border border-ink-700 px-4 py-2 text-sm text-ink-200 hover:border-accent-400/40 hover:text-accent-200"

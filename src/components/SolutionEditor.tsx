@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useAuth, useDisplayName } from '../lib/AuthContext';
 import { syncMyProfile } from '../lib/profile';
 import MathText from './MathText';
+import LaTeXMacros from './LaTeXMacros';
 import type { Solution } from '../lib/types';
 
 interface Props {
@@ -39,8 +40,8 @@ export default function SolutionEditor({ problemId, weekId }: Props) {
   const [splitView, setSplitView] = useState(true);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load any saved draft from localStorage on mount.
   useEffect(() => {
     if (!user) return;
     const saved = localStorage.getItem(DRAFT_KEY(problemId));
@@ -49,7 +50,6 @@ export default function SolutionEditor({ problemId, weekId }: Props) {
     }
   }, [problemId, user]);
 
-  // Auto-save draft to localStorage (debounced).
   useEffect(() => {
     if (!user || !draft) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -105,7 +105,6 @@ export default function SolutionEditor({ problemId, weekId }: Props) {
       return;
     }
     const rows = (data as SolutionRow[]) ?? [];
-    // Fetch vote counts + my vote for each solution.
     const { data: votes } = await supabase
       .from('solution_votes')
       .select('solution_id, voter_id')
@@ -220,8 +219,6 @@ export default function SolutionEditor({ problemId, weekId }: Props) {
     if (row.id === mySolution?.id) setMySolution(updated);
     setCommunity((c) => c.map((s) => (s.id === row.id ? updated : s)));
     void syncMyProfile();
-    // If the host is marking correct, stamp first blood on the problem if not
-    // already set. We need the problem_id (the row carries it).
     if (value && isHost) {
       const { data: existing } = await supabase
         .from('problems')
@@ -236,6 +233,22 @@ export default function SolutionEditor({ problemId, weekId }: Props) {
           .eq('id', row.problem_id);
       }
     }
+  };
+
+  const insertLatex = (latex: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea || !draft) {
+      setDraft('$' + latex + '$' + (draft || ''));
+      return;
+    }
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const newDraft = draft.slice(0, start) + '$' + latex + '$' + draft.slice(end);
+    setDraft(newDraft);
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + 1, start + latex.length + 1);
+    }, 0);
   };
 
   if (!configured) {
@@ -258,20 +271,19 @@ export default function SolutionEditor({ problemId, weekId }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* My submission */}
       <div className="rounded-lg border border-ink-700 bg-ink-850/60 p-4">
         <div className="mb-3 flex items-center justify-between">
           <h4 className="font-mono text-xs uppercase tracking-wider text-ink-300">
             {mySolution ? 'Your submitted solution' : 'Submit your solution'}
           </h4>
           {mySolution && (
-            <span className="font-mono text-[10px] text-accent-300">submitted · editable</span>
+            <span className="font-mono text-[10px] text-accent-300">submitted - editable</span>
           )}
         </div>
 
         {loadingMine ? (
           <div className="flex items-center gap-2 text-sm text-ink-400">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading...
           </div>
         ) : mySolution && !draft ? (
           <div className="space-y-3">
@@ -323,12 +335,18 @@ export default function SolutionEditor({ problemId, weekId }: Props) {
                     draft saved {new Date(savedAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                   </>
                 ) : (
-                  'Markdown + LaTeX · auto-saves locally'
+                  'Markdown + LaTeX - auto-saves locally'
                 )}
               </span>
             </div>
+
+            <div className="mb-3">
+              <LaTeXMacros onInsert={insertLatex} />
+            </div>
+
             <div className={`grid gap-3 ${splitView ? 'sm:grid-cols-2' : 'grid-cols-1'}`}>
               <textarea
+                ref={textareaRef}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder={SAMPLE}
@@ -376,7 +394,6 @@ export default function SolutionEditor({ problemId, weekId }: Props) {
         )}
       </div>
 
-      {/* Community solutions toggle */}
       <div className="rounded-lg border border-ink-700 bg-ink-850/40 p-4">
         <button
           onClick={() => {
@@ -407,7 +424,7 @@ export default function SolutionEditor({ problemId, weekId }: Props) {
           <div className="mt-4 space-y-3">
             {loadingCommunity ? (
               <div className="flex items-center gap-2 text-sm text-ink-400">
-                <Loader2 className="h-4 w-4 animate-spin" /> Loading community solutions…
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading community solutions...
               </div>
             ) : community.length === 0 ? (
               <p className="text-sm text-ink-400">No community solutions yet. Be the first.</p>
