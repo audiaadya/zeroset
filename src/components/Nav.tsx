@@ -13,6 +13,7 @@ const LINKS = [
   { href: '/', label: 'Current Week' },
   { href: '/archive', label: 'Archive' },
   { href: '/community', label: 'Community Sets' },
+  { href: '/skill-tree', label: 'Skill Tree' },
   { href: '/forum', label: 'Forum' },
   { href: '/sandbox', label: 'Sandbox' },
 ];
@@ -129,6 +130,12 @@ export default function Nav({ current, navigate }: Props) {
                     className="focus-ring flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-ink-200 hover:text-accent-200"
                   >
                     Account stats
+                  </button>
+                  <button
+                    onClick={() => { go('/me/settings'); }}
+                    className="focus-ring flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-ink-200 hover:text-accent-200"
+                  >
+                    Settings
                   </button>
                   {isHost && (
                     <button

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { renderMarkdown } from '../lib/math';
 
 interface Props {
@@ -7,7 +7,6 @@ interface Props {
 }
 
 export default function MathText({ children, className = '' }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -18,7 +17,7 @@ export default function MathText({ children, className = '' }: Props) {
       if (w.katex) {
         setReady(true);
       } else {
-        setTimeout(tryRender, 80);
+        setTimeout(tryRender, 50);
       }
     };
     tryRender();
@@ -27,11 +26,21 @@ export default function MathText({ children, className = '' }: Props) {
     };
   }, []);
 
-  const html = ready ? renderMarkdown(children) : '';
+  const html = useMemo(() => {
+    if (!ready) return '';
+    return renderMarkdown(children);
+  }, [children, ready]);
+
+  if (!ready) {
+    return (
+      <div className={`prose-math ${className}`}>
+        <span className="text-sm text-ink-400">Loading math renderer...</span>
+      </div>
+    );
+  }
 
   return (
     <div
-      ref={ref}
       className={`prose-math ${className}`}
       dangerouslySetInnerHTML={{ __html: html }}
     />
