@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from './lib/AuthContext';
 import { matchRoute, useRouter } from './lib/router';
 import Nav from './components/Nav';
@@ -101,6 +102,7 @@ export default function App() {
         </main>
         <Footer navigate={navigate} />
       </div>
+      <Analytics />
     </AuthProvider>
   );
 }
