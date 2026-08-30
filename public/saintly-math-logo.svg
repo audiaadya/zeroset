@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240" role="img" aria-labelledby="title desc">
+  <title id="title">Saintly Math</title>
+  <desc id="desc">Saintly Math logo in blue script with coral wings and halo</desc>
+  <rect width="640" height="240" fill="#fff"/>
+  <g fill="none" stroke="#ff9e82" stroke-linecap="round" stroke-linejoin="round" stroke-width="8">
+    <path d="M150 86c-26-28-51-33-68-26 18 8 31 19 38 36-22-12-39-10-50-2 20 9 31 23 37 40 18-16 28-29 43-25"/>
+    <path d="M490 86c26-28 51-33 68-26-18 8-31 19-38 36 22-12 39-10 50-2-20 9-31 23-37 40-18-16-28-29-43-25"/>
+    <ellipse cx="320" cy="36" rx="35" ry="12" transform="rotate(-25 320 36)"/>
+  </g>
+  <text x="320" y="153" text-anchor="middle" fill="#72a6f4" font-family="'Segoe Script','Bradley Hand',cursive" font-size="92" font-weight="600" letter-spacing="-4">Saintly</text>
+  <path d="M246 177c44 12 103 15 151-1" fill="none" stroke="#72a6f4" stroke-linecap="round" stroke-width="7"/>
+</svg>
